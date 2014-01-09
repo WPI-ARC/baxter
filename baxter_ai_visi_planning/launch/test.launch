@@ -1,0 +1,35 @@
+<launch>
+
+  <!-- By default we do not overwrite the URDF. Change the following to true to change the default behavior -->
+  <arg name="load_robot_description" default="true"/>
+
+  <!-- Load universal robotic description format (URDF) -->
+  <param if="$(arg load_robot_description)" name="robot_description" textfile="$(find baxter_description)/urdf/baxter.urdf"/>
+
+  <!-- The semantic description that corresponds to the URDF -->
+  <param name="robot_description_semantic" textfile="$(find baxter_moveit_config)/config/baxter.srdf" />
+
+  <include file="$(find baxter_moveit_config)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="true"/>
+  </include>
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="/use_gui" value="false"/>
+    <rosparam command="load" file="$(find baxter_moveit_config)/config/kinematics.yaml"/>
+  </node>
+  
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
+
+  <node name="task_space_right_hand_publisher" pkg="ai_visi_plan" type="task_space_right_hand.py" />
+
+  <node name="obstacle_right_hand_publisher" pkg="ai_visi_plan" type="obstacle_right_hand.py" />
+
+  <node name="box_and_table_publisher" pkg="baxter_cams1" type="box_and_table.py" />
+
+  <node name="visi_plan" pkg="ai_visi_plan" type="visi_plan" respawn="false" output="screen">
+    <rosparam command="load" file="$(find baxter_moveit_config)/config/kinematics.yaml"/>
+  </node>
+
+
+  
+</launch>
